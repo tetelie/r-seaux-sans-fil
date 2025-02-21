@@ -1,5 +1,5 @@
-#M1 SECIL - 2024/2025
-##Projet de l'UE Réseaux sans fil
+# M1 SECIL - 2024/2025
+## Projet de l'UE Réseaux sans fil
 
 Le but de ce projet est de manipuler TCP et DCCP au-dessus des réseaux Wifi et Bluetooth.
 Les machines à utiliser sont des Raspberry Pi 3 (intégrant les deux interfaces Wifi et Bluetooth).
