@@ -5,6 +5,7 @@ use std::net::TcpListener;
 use std::process::Command;
 use std::thread;
 use std::time::Duration;
+use std::process;
 
 fn main() -> std::io::Result<()>{
     let listener = TcpListener::bind("0.0.0.0:7878");
@@ -31,11 +32,11 @@ fn main() -> std::io::Result<()>{
         let _ = Command::new("chmod").arg("+x").arg(&file_name).output();
 
         // Executer le fichier
-	thread::sleep(Duration::from_millis(500));
+	    thread::sleep(Duration::from_millis(500));
         let output = Command::new(format!("./{}", file_name)).output().expect("Echec de l'execution du fichier");
 
         println!("Sortie du programme : {}", String::from_utf8_lossy(&output.stdout));
-
+        process::exit(1);
     }
 
     Ok(())
