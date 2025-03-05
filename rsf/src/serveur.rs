@@ -3,6 +3,8 @@ use std::fs::File;
 use std::io::{Read,Write};
 use std::net::TcpListener;
 use std::process::Command;
+use std::thread;
+use std::time::Duration;
 
 fn main() -> std::io::Result<()>{
     let listener = TcpListener::bind("0.0.0.0:7878");
@@ -23,11 +25,13 @@ fn main() -> std::io::Result<()>{
         stream.read_to_end(&mut buffer)?;
         file.write_all(&buffer)?;
         println!("Fichier reçu : {}", file_name);
+	drop(file);
 
         // Rendre le fichier éxécutable
         let _ = Command::new("chmod").arg("+x").arg(&file_name).output();
 
         // Executer le fichier
+	thread::sleep(Duration::from_millis(500));
         let output = Command::new(format!("./{}", file_name)).output().expect("Echec de l'execution du fichier");
 
         println!("Sortie du programme : {}", String::from_utf8_lossy(&output.stdout));
