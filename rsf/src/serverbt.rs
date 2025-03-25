@@ -1,5 +1,5 @@
 use std::fs::{File, OpenOptions};
-use std::io::{Read, Write};
+use std::io::{Read, Write, self};
 use std::net::TcpListener;
 use std::process::Command;
 use std::thread;
@@ -10,27 +10,31 @@ const CHUNK_SIZE: usize = 4096;
 fn attendre_signal_bluetooth() {
     println!("En attente du signal Bluetooth...");
 
-    let _ = Command::new("rfcomm")
-        .arg("bind")
-        .arg("0")
-        .arg("00:11:22:33:44:55")  // Remplace par l'adresse MAC du client
-        .output()
+    let mut child = Command::new("rfcomm")
+        .arg("watch")
+        .arg("hci0")
+        .arg("B8:27:EB:17:58:EB")  // Remplace par l'adresse MAC du client
+	.spawn()
         .expect("Échec de la liaison Bluetooth");
 
+    println!("Connexion réussie!");
+	
+    thread::sleep(Duration::from_secs(5));
+    //let mut input = String::new();
+    //io::stdin().read_line(&mut input).expect("failed to read line");
     let mut buffer = [0; 256];
     let mut file = File::open("/dev/rfcomm0").expect("Échec de l'ouverture de rfcomm0");
-
     loop {
+	
         if let Ok(bytes_read) = file.read(&mut buffer) {
             let message = String::from_utf8_lossy(&buffer[..bytes_read]);
-            if message.trim() == "EXECUTER" {
-                println!("Signal Bluetooth reçu ! Exécution du fichier...");
-                break;
-            }
+            println!("Signal Bluetooth reçu ! Exécution du fichier...");
+            break;
         }
 
-        thread::sleep(Duration::from_secs(1));
+        //thread::sleep(Duration::from_secs(1));
     }
+	let _ = child.kill();
 }
 
 fn main() -> std::io::Result<()> {
@@ -58,7 +62,8 @@ fn main() -> std::io::Result<()> {
         // Ouvrir le fichier en mode append
         let mut file = OpenOptions::new()
             .create(true)
-            .append(true)
+            .write(true)
+	    .truncate(true)
             .open(&file_name)?;
 
         let mut buffer = [0; CHUNK_SIZE];
@@ -72,20 +77,26 @@ fn main() -> std::io::Result<()> {
         }
 
         println!("Fichier reçu : {}", file_name);
+		
+	io::stdout().flush().unwrap();
+	io::stdout().flush().expect("Failed to flush stdout");
+
         drop(file);
 
         // Rendre le fichier exécutable
         let _ = Command::new("chmod").arg("+x").arg(&file_name).output();
 
-        // Attendre le signal Bluetooth avant d'exécuter le fichier
+        // Attendre le signal Bluetooth avant d'exécuter le fichie
         attendre_signal_bluetooth();
+	
 
         // Exécuter le fichier
         thread::sleep(Duration::from_millis(500));
         let output = Command::new(format!("./{}", file_name)).output().expect("Échec de l'exécution");
 
         println!("Sortie du programme : {}", String::from_utf8_lossy(&output.stdout));
-    }
-
+	println!("Fin du programme.");
+    	break;
+	}
     Ok(())
 }
