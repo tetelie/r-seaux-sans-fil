@@ -6,7 +6,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # desactivate NetworkManager
-sudo systemctl NetworkManager.service
+sudo systemctl disable NetworkManager.service
 
 # setup adhoc mode
 sudo ip link set wlan0 down
