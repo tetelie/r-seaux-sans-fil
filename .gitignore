@@ -1,0 +1,26 @@
+# Binaries
+target/
+**/*.rs.bk
+
+# Rust/Cargo-specific files
+Cargo.lock
+.cargo/
+*.rs.bk
+
+# IDE/editor specific files
+.idea/
+.vscode/
+*.iml
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+*.swn
+.DS_Store
+Thumbs.db
+
+# Rust documentation and test output
+/doc/
+/tests/output/
